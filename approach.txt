@@ -1,0 +1,204 @@
+TECHNICAL REPORT
+Traffic Demand Prediction - Advanced Spatial Ensemble
+
+1. PROJECT OVERVIEW
+
+This project focuses on predicting normalized traffic demand across geohash regions and future time slots using spatial-temporal machine learning techniques. The notebook implements an advanced ensemble-based forecasting pipeline that combines geospatial modeling, temporal trend analysis, neighborhood propagation, and gradient boosted regression models.
+
+The objective is to estimate future traffic demand values between 0 and 1 for unseen time windows by leveraging historical demand patterns, geohash relationships, temporal continuity, and environmental attributes. The solution is designed to generalize across regions while adapting to localized traffic fluctuations.
+
+2. DATA PROCESSING AND PIPELINE DESIGN
+
+The notebook establishes a complete machine learning pipeline beginning with data loading, preprocessing, feature engineering, spatial decomposition, model training, blending, and final submission generation.
+
+Key preprocessing operations include:
+
+• Timestamp conversion into minute-level and cyclic time features
+• Geohash decoding into latitude and longitude coordinates
+• Handling missing temperature values and categorical encoding
+• Generation of normalized temporal indicators
+• Construction of geospatial neighborhood relationships
+
+The pipeline also configures optimized numerical thread settings and integrates multiple machine learning frameworks including LightGBM, CatBoost, ExtraTrees, and HistGradientBoosting.
+
+3. FEATURE ENGINEERING STRATEGY
+
+Feature engineering forms the core strength of the solution. The notebook generates several categories of features.
+
+3.1 Temporal Features
+
+Generated temporal features include:
+
+• sin_t and cos_t for cyclic time encoding
+• hour and minute representations
+• trend-based time indicators
+• early-slot transition statistics
+
+These features allow the model to capture periodic traffic behavior.
+
+3.2 Geospatial Features
+
+The notebook decodes geohashes into latitude and longitude coordinates and derives:
+
+• geohash-level aggregate demand statistics
+• spatial neighborhood averages
+• inverse-distance weighted neighbor signals
+• local demand density patterns
+
+Spatial relationships are modeled using nearest-neighbor computations and geohash adjacency structures.
+
+3.3 Day-48 Reference Features
+
+Historical reference matrices are constructed using prior-day demand behavior:
+
+• d48gt
+• d48roll
+• d48roll3
+• d48roll5
+• d48roll7
+
+These rolling statistics capture historical continuity and stabilize predictions.
+
+3.4 Calibration and Transfer Features
+
+The notebook computes transfer-based signals between observed and future periods:
+
+• offset_shrunk
+• anchor
+• anchor_diff
+• gap
+• offset_slope
+• early_trend_projected
+
+These features help the model adapt historical patterns to current-day traffic conditions.
+
+3.5 Statistical Aggregates
+
+The model additionally computes:
+
+• mean demand
+• standard deviation
+• min/max demand
+• median demand
+• observation counts
+
+These aggregates provide robust geohash-level behavioral summaries.
+
+4. SPATIAL MODELING APPROACH
+
+A major strength of the notebook is its explicit spatial modeling strategy.
+
+Neighbor lookup tables are generated using geohash proximity and nearest-neighbor algorithms. The solution computes neighborhood-level features such as:
+
+• neighborhood means
+• neighborhood standard deviation
+• inverse-distance weighted averages
+• localized trend propagation
+
+This allows the model to capture traffic spillover effects where neighboring regions influence one another. Spatial backbone predictions are also generated to improve robustness in sparse regions.
+
+5. MODEL ARCHITECTURE
+
+5.1 LightGBM
+
+LightGBM is used as a primary boosted-tree learner due to:
+
+• high efficiency on tabular data
+• strong handling of non-linear interactions
+• support for large feature sets
+• robust performance on structured forecasting problems
+
+5.2 CatBoost
+
+CatBoost is incorporated as an additional ensemble learner:
+
+• effective regularization
+• strong generalization capability
+• stable handling of encoded categorical information
+
+5.3 ExtraTrees and HistGradientBoosting
+
+Residual modeling is performed using:
+
+• ExtraTreesRegressor
+• HistGradientBoostingRegressor
+
+These models help capture residual nonlinearities not fully modeled by boosted trees.
+
+5.4 Ensemble Blending
+
+The notebook combines predictions from multiple models using weighted blending strategies. The final ensemble improves stability and reduces variance while preserving responsiveness to local traffic patterns.
+
+6. CORE FUNCTIONS IMPLEMENTED
+
+The notebook defines several modular functions for maintainability and reproducibility:
+
+• timestamp_to_minutes()
+• decode_geohash()
+• add_time_features()
+• build_day48_reference_tables()
+• build_neighbor_lookup()
+• build_day48_matrices()
+• compute_d49_prefix_stats()
+• prepare_context()
+• compute_day49_transfer_signals()
+• build_spatial_features()
+• train_spatial_residual_ensemble()
+• train_day48_raw_model()
+• train_catboost_direct_model()
+• train_extra_residual_models()
+• build_spatial_backbone_prediction()
+• blend_v4()
+• save_submission()
+
+The modular structure makes the pipeline scalable and easier to debug or extend.
+
+7. VALIDATION AND GENERALIZATION
+
+The notebook is designed to generalize from historical traffic patterns to future unseen slots. Rather than relying solely on raw demand history, the pipeline uses:
+
+• spatial smoothing
+• temporal transfer learning
+• ensemble averaging
+• residual correction
+
+These techniques reduce overfitting and improve robustness across varying geohash regions and traffic densities.
+
+8. FINAL PIPELINE SUMMARY
+
+The complete workflow implemented in the notebook is:
+
+1. Load and preprocess datasets
+
+2. Decode geohashes into spatial coordinates
+
+3. Generate temporal and cyclic features
+
+4. Build historical day-48 reference matrices
+
+5. Construct neighborhood lookup structures
+
+6. Generate transfer and calibration signals
+
+7. Build spatial backbone features
+
+8. Train multiple ensemble learners
+
+9. Blend model outputs
+
+10. Generate final traffic demand predictions
+
+11. Save submission_v4_improved.csv
+
+12. CONCLUSION
+
+The notebook demonstrates an advanced spatial-temporal machine learning framework for traffic demand forecasting. The primary contribution of the solution lies in combining:
+
+• geospatial intelligence
+• temporal continuity
+• neighborhood propagation
+• residual correction
+• ensemble learning
+
+The architecture is highly modular, scalable, and optimized for structured forecasting tasks. By integrating multiple complementary learners with engineered spatial-temporal signals, the solution achieves strong predictive capability while maintaining stability and interpretability.
+
